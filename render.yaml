@@ -1,0 +1,34 @@
+# Render Blueprint. Secrets are NOT stored here: values marked "sync: false" are typed
+# into the Render dashboard the first time you deploy.
+services:
+  - type: web
+    name: butros-softwares
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: 1
+      - key: SITE_NAME
+        value: BUTROS SOFTWARES
+      - key: APP_URL            # e.g. https://butros-softwares.onrender.com (no trailing slash)
+        sync: false
+      - key: DATABASE_URL       # PostgreSQL connection string (Neon recommended, see README)
+        sync: false
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: GOOGLE_SITE_VERIFICATION
+        sync: false
