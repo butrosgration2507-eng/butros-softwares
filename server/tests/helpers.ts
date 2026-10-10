@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 import { createApp } from '../src/app.js';
 import { loadConfig } from '../src/config.js';
 import { hashPassword } from '../src/crypto.js';
-import { createPgliteDb, runMigrations } from '../src/db.js';
+import { createPgDb, createPgliteDb, runMigrations } from '../src/db.js';
 import type { DriveFileInfo, GoogleGateway, PublicCheck } from '../src/google.js';
 
 export function makeMockGoogle() {
@@ -52,7 +52,17 @@ export async function makeCtx() {
     APP_URL: 'https://butros.example',
     WEB_DIST: dist,
   });
-  const db = await createPgliteDb('memory://');
+  let db;
+  if (process.env.TEST_DATABASE_URL) {
+    // Optional: run the same tests against REAL PostgreSQL (each context gets its own schema).
+    const schema = 't_' + crypto.randomBytes(6).toString('hex');
+    const admin = createPgDb(process.env.TEST_DATABASE_URL);
+    await admin.exec(`create schema ${schema}`);
+    await admin.close();
+    db = createPgDb(process.env.TEST_DATABASE_URL, { schema });
+  } else {
+    db = await createPgliteDb('memory://');
+  }
   await runMigrations(db);
   const { gw, state } = makeMockGoogle();
   const app = createApp({ db, config, google: gw });

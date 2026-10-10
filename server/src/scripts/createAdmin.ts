@@ -62,7 +62,7 @@ if (existing.rowCount) {
   console.log(`Password updated for ${email}. Existing sessions were signed out.`);
 } else {
   const r = await db.query<{ id: string }>('insert into admins(email, password_hash) values ($1,$2) returning id', [email, hash]);
-  await db.query(`insert into audit_logs(admin_id, admin_email, action, entity_type, entity_id) values ($1,$2,'admin.create','admin',$1::text)`, [r.rows[0].id, email]);
+  await db.query(`insert into audit_logs(admin_id, admin_email, action, entity_type, entity_id) values ($1,$2,'admin.create','admin',$3)`, [r.rows[0].id, email, r.rows[0].id]);
   console.log(`Administrator created: ${email}. You can sign in at /admin.`);
 }
 await db.close();

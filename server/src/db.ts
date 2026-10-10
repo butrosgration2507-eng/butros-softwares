@@ -41,10 +41,10 @@ function wrapPg(c: pg.Pool | pg.PoolClient): Queryable {
   };
 }
 
-export function createPgDb(connectionString: string): Db {
+export function createPgDb(connectionString: string, opts: { schema?: string } = {}): Db {
   // int8 (bigint) -> JS number. File sizes stay far below 2^53.
   pg.types.setTypeParser(20, (v: string) => Number(v));
-  const pool = new pg.Pool({ connectionString, max: 10, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 15_000 });
+  const pool = new pg.Pool({ connectionString, ...(opts.schema ? { options: `-c search_path=${opts.schema}` } : {}), max: 10, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 15_000 });
   pool.on('error', (e) => console.error('Postgres pool error:', e.message));
   const base = wrapPg(pool);
   return {

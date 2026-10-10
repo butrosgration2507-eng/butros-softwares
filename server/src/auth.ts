@@ -16,11 +16,11 @@ export function cookieOptions(config: Config) {
 export async function createSession(db: Db, config: Config, adminId: string) {
   const token = randomToken(32);
   const csrf = randomToken(24);
-  await db.query(`insert into sessions(token_hash, admin_id, csrf_token, expires_at) values ($1,$2,$3, now() + ($4 || ' hours')::interval)`, [
+  await db.query(`insert into sessions(token_hash, admin_id, csrf_token, expires_at) values ($1,$2,$3, now() + ($4::double precision * interval '1 hour'))`, [
     sha256Hex(token),
     adminId,
     csrf,
-    String(config.sessionTtlHours),
+    config.sessionTtlHours,
   ]);
   return { token, csrf };
 }
